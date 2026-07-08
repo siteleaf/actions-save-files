@@ -19,6 +19,7 @@ runs:
       with:
         role-to-assume: arn:aws:iam::548212765079:role/github.${{ github.repository_owner }} #.${{ github.event.repository.name }}
         aws-region: us-east-1
+        retry-max-attempts: 1
 
     - name: Deploy to Siteleaf (comparing size only)
       if: inputs.compare_size_only == 'true'
