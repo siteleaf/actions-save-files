@@ -20,16 +20,21 @@ runs:
         role-to-assume: arn:aws:iam::548212765079:role/github.${{ github.repository_owner }} #.${{ github.event.repository.name }}
         aws-region: us-east-1
 
-    - name: Deploy to Siteleaf
+    - name: Deploy to Siteleaf (comparing size only)
+      if: inputs.compare_size_only == 'true'
       shell: bash
       run: |
-        ARGS="--delete"
-    
-        if [ "${{ inputs.compare_size_only }}" = "true" ]; then
-          ARGS="$ARGS --size-only"
-        fi
-    
         aws s3 sync \
           "${{ inputs.publish_dir }}/" \
           "s3://siteleaf-cloud/${{ github.repository }}/${{ github.ref_name }}/" \
-          $ARGS
+          --delete \
+          --size-only
+    
+    - name: Deploy to Siteleaf
+      if: inputs.compare_size_only != 'true'
+      shell: bash
+      run: |
+        aws s3 sync \
+          "${{ inputs.publish_dir }}/" \
+          "s3://siteleaf-cloud/${{ github.repository }}/${{ github.ref_name }}/" \
+          --delete
