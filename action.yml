@@ -1,0 +1,25 @@
+name: Save files to Siteleaf
+description: Upload compiled static site files to Siteleaf preview storage
+
+inputs:
+  publish_dir:
+    description: Directory to upload
+    required: false
+    default: _site
+
+runs:
+  using: composite
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::548212765079:role/github.${{ github.repository_owner }} #.${{ github.event.repository.name }}
+        aws-region: us-east-1
+
+    - name: Deploy to Siteleaf
+      shell: bash
+      run: |
+        aws s3 sync "${{ inputs.publish_dir }}/" \
+          "s3://siteleaf-cloud/${{ github.repository }}/${{ github.ref_name }}/" \
+          --delete \
+          --size-only
