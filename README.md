@@ -9,9 +9,9 @@ Example usage:
 name: Build preview with Jekyll and Sitleaf
 
 on:
-  # Runs on pushes targeting the default branch(s)
   push:
-    branches: ["**"]
+    branches:
+      - main  # Build previews for main branch
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,10 +31,14 @@ jobs:
       - name: Setup Ruby           # Required only if using Jekyll
         uses: ruby/setup-ruby@v1
         with:
-          bundler-cache: true
+          ruby-version: "3.2"      # Not needed with .ruby-version, .tool-versions, etc
+          bundler-cache: true      # Runs 'bundle install' and caches installed gems
           
       - name: Build Jekyll site    # Replace with your custom build steps
-        run: bundle exec jekyll build
+        run: bundle exec jekyll build \
+          --future \
+          --unpublished \
+          --drafts
 
       - name: Deploy to Siteleaf
         uses: siteleaf/actions-save-files@v1
