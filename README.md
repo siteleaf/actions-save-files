@@ -18,7 +18,7 @@ on:
 permissions:
   contents: read
   id-token: write       # Required for siteleaf/actions-save-files
-  pull_requests: write  # Required for auto Preview URL in PR comments
+  pull-requests: write  # Required for auto Preview URL in PR comments
   
 jobs:
   preview:
