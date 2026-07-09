@@ -37,8 +37,11 @@ jobs:
       - name: Build Jekyll site    # Replace with your custom build steps
         env:
           JEKYLL_ENV: staging
-        run: bundle exec jekyll build \
-          --config _config.yml,_config_staging.yml
+        run: |
+          bundle exec jekyll build \
+            --future \
+            --unpublished \
+            --drafts
 
       - name: Deploy to Siteleaf
         uses: siteleaf/actions-save-files@v1
