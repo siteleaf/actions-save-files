@@ -11,14 +11,16 @@ name: Build preview with Jekyll and Sitleaf
 on:
   push:
     branches:
-      - main  # Build previews for main branch
+      - staging     # Build previews for "staging" branch
+    pull_requests:  # Build previews for PRs
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write  # Required for siteleaf/actions-save-files
+  id-token: write       # Required for siteleaf/actions-save-files
+  pull_requests: write  # Required for auto Preview URL in PR comments
   
 jobs:
   preview:
