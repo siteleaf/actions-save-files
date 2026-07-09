@@ -6,16 +6,14 @@ Example usage:
 ```yaml
 # .github/workflows/preview.yml
 
-name: Build preview with Jekyll and Sitleaf
+name: Build preview with Jekyll and Siteleaf
 
 on:
   push:
     branches:
-      - staging     # Build previews for "staging" branch
-    pull_requests:  # Build previews for PRs
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+      - preview       # Build previews for "preview" branch
+    pull_requests:    # Build previews for PRs
+  workflow_dispatch:  # Build manually from the Actions tab
 
 permissions:
   contents: read
