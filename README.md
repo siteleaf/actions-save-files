@@ -12,7 +12,7 @@ on:
   push:
     branches:
       - preview       # Build previews for "preview" branch
-    pull_requests:    # Build previews for PRs
+  pull_request:       # Build previews for PRs
   workflow_dispatch:  # Build manually from the Actions tab
 
 permissions:
