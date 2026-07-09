@@ -35,10 +35,10 @@ jobs:
           bundler-cache: true      # Runs 'bundle install' and caches installed gems
           
       - name: Build Jekyll site    # Replace with your custom build steps
+        env:
+          JEKYLL_ENV: staging
         run: bundle exec jekyll build \
-          --future \
-          --unpublished \
-          --drafts
+          --config _config.yml,_config_staging.yml
 
       - name: Deploy to Siteleaf
         uses: siteleaf/actions-save-files@v1
