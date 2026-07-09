@@ -62,7 +62,8 @@ runs:
           --jq ".[] | select(.user.login==\"github-actions[bot]\" and (.body | contains(\"$MARKER\"))) | .id" \
           | head -n1)
         
-        BODY="$MARKER 🚀 Preview: <$PREVIEW_URL>"
+        BODY="$MARKER
+          🚀 Preview: <$PREVIEW_URL>"
         
         if [ -n "$COMMENT_ID" ]; then
           gh api \
