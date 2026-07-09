@@ -40,7 +40,8 @@ runs:
           "s3://siteleaf-cloud/${{ github.repository }}/${{ github.ref_name }}/" \
           --delete
 
-    - name: Get preview URL
+    - name: Get Preview URL
+      if: github.event_name == 'pull_request'
       shell: bash
       run: |
         PREVIEW_URL=$(curl -fsS \
@@ -48,11 +49,27 @@ runs:
     
         echo "PREVIEW_URL=$PREVIEW_URL" >> "$GITHUB_ENV"
           
-    - name: Comment preview URL
+    - name: Comment Preview URL on PRs
       if: github.event_name == 'pull_request'
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh pr comment ${{ github.event.pull_request.number }} \
-          --body "🚀 Preview: $PREVIEW_URL"
+        MARKER="<!-- siteleaf-preview -->"
+
+        COMMENT_ID=$(gh api \
+          repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+          --jq ".[] | select(.user.login==\"github-actions[bot]\" and (.body | contains(\"$MARKER\"))) | .id" \
+          | head -n1)
+        
+        BODY="$MARKER 🚀 Preview: $PREVIEW_URL"
+        
+        if [ -n "$COMMENT_ID" ]; then
+          gh api \
+            repos/${{ github.repository }}/issues/comments/$COMMENT_ID \
+            --method PATCH \
+            -f body="$BODY"
+        else
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body "$BODY"
+        fi
