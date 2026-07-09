@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Setup Ruby           # Required only if using Jekyll
         uses: ruby/setup-ruby@v1
