@@ -51,26 +51,57 @@ runs:
           
     - name: Comment Preview URL on PRs
       if: github.event_name == 'pull_request'
-      shell: bash
+      uses: actions/github-script@v7
       env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        MARKER="<!-- siteleaf-preview -->"
-
-        COMMENT_ID=$(gh api \
-          repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-          --jq ".[] | select(.user.login==\"github-actions[bot]\" and (.body | contains(\"$MARKER\"))) | .id" \
-          | head -n1)
-        
-        BODY="$MARKER
-          🚀 Preview: <$PREVIEW_URL>"
-        
-        if [ -n "$COMMENT_ID" ]; then
-          gh api \
-            repos/${{ github.repository }}/issues/comments/$COMMENT_ID \
-            --method PATCH \
-            -f body="$BODY"
-        else
-          gh pr comment "${{ github.event.pull_request.number }}" \
-            --body "$BODY"
-        fi
+        PREVIEW_URL: ${{ env.PREVIEW_URL }}
+      with:
+        script: |
+          const marker = "<!-- siteleaf-preview -->";
+          const body = `${marker}
+          🚀 **Preview:** <${process.env.PREVIEW_URL}>`;
+    
+          async function ignorePermissionErrors(fn) {
+            try {
+              return await fn();
+            } catch (error) {
+              if (error.status === 403) {
+                core.info("Skipping PR comment; token does not have permission.");
+                return null;
+              }
+              throw error;
+            }
+          }
+    
+          const comments = await ignorePermissionErrors(() =>
+            github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+          );
+    
+          if (!comments) return;
+    
+          const existing = comments.data.find(
+            c => c.user.login === "github-actions[bot]" && c.body.includes(marker)
+          );
+    
+          if (existing) {
+            await ignorePermissionErrors(() =>
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              })
+            );
+          } else {
+            await ignorePermissionErrors(() =>
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              })
+            );
+          }
