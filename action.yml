@@ -39,3 +39,20 @@ runs:
           "${{ inputs.publish_dir }}/" \
           "s3://siteleaf-cloud/${{ github.repository }}/${{ github.ref_name }}/" \
           --delete
+
+    - name: Get preview URL
+      shell: bash
+      run: |
+        PREVIEW_URL=$(curl -fsS \
+          "https://api.cloud-preview.siteleaf.com/_url?org=${{ github.repository_owner }}&repo=${{ github.event.repository.name }}&ref=${{ github.ref_name }}")
+    
+        echo "PREVIEW_URL=$PREVIEW_URL" >> "$GITHUB_ENV"
+          
+    - name: Comment preview URL
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh pr comment ${{ github.event.pull_request.number }} \
+          --body "🚀 Preview: $PREVIEW_URL"
